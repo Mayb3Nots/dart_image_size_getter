@@ -32,6 +32,29 @@ class JpegDecoder extends ImageDecoder {
     }
   }
 
+  @override
+  Future<Size> sizeAsync() async {
+    int start = 2;
+    BlockEntity block;
+
+    while (true) {
+      block = await getBlockInfoAsync(start);
+      if (block == null) {
+        return Size(-1, -1);
+      }
+
+      if (block.type == 0xC0 || block.type == 0xC2) {
+        final widthList = await input.getRangeAsync(start + 7, start + 9);
+        final heightList = await input.getRangeAsync(start + 5, start + 7);
+        final width = convertRadix16ToInt(widthList);
+        final height = convertRadix16ToInt(heightList);
+        return Size(width, height);
+      } else {
+        start += block.length;
+      }
+    }
+  }
+
   int getIntFromRange(List<int> list, int start, int end) {
     final rangeInt = list.getRange(start, end);
     final sb = StringBuffer();
@@ -50,6 +73,26 @@ class JpegDecoder extends ImageDecoder {
       }
 
       final radix16List = input.getRange(blackStart + 2, blackStart + 4);
+      final blockLength = convertRadix16ToInt(radix16List) + 2;
+      final typeInt = blockInfoList[1];
+
+      return BlockEntity(typeInt, blockLength);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<BlockEntity> getBlockInfoAsync(int blackStart) async {
+    try {
+      final blockInfoList =
+          await input.getRangeAsync(blackStart, blackStart + 4);
+
+      if (blockInfoList[0] != 0xFF) {
+        return null;
+      }
+
+      final radix16List =
+          await input.getRangeAsync(blackStart + 2, blackStart + 4);
       final blockLength = convertRadix16ToInt(radix16List) + 2;
       final typeInt = blockInfoList[1];
 

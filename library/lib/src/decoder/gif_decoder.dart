@@ -18,4 +18,15 @@ class GifDecoder extends ImageDecoder {
 
     return Size(width, height);
   }
+
+  @override
+  Future<Size> sizeAsync() async {
+    final widthList = await input.getRangeAsync(6, 8);
+    final heightList = await input.getRangeAsync(8, 10);
+
+    final width = convertRadix16ToInt(widthList, reverse: true);
+    final height = convertRadix16ToInt(heightList, reverse: true);
+
+    return Size(width, height);
+  }
 }

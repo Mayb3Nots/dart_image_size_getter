@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart';
@@ -39,5 +40,30 @@ void main() {
     final size = ImageSizeGetter.getSize(MemoryInput(bytes));
     print('size = $size');
     await expectLater(size, Size(96, 96));
+  });
+
+  test('Test net image size', () async {
+    final url = 'https://cdn.jsdelivr.net/gh/kikt-blog/blog-2@pay/pay.jpg';
+
+    final client = HttpClient();
+
+    final req = await client.getUrl(Uri.parse(url));
+    final resp = await req.close();
+
+    final buffer = <int>[];
+
+    await resp.listen((event) {
+      buffer.addAll(event);
+    }).asFuture();
+
+    client.close();
+
+    final image = Uint8List.fromList(buffer);
+    final input = MemoryInput(image);
+
+    final size = ImageSizeGetter.getSize(input);
+    print(size);
+
+    await expectLater(size, Size(835, 400));
   });
 }

@@ -3,6 +3,10 @@ import '../core/size.dart';
 abstract class ImageDecoder {
   Size get size;
 
+  Future<Size> sizeAsync() async {
+    return size;
+  }
+
   int convertRadix16ToInt(List<int> list, {bool reverse = false}) {
     final sb = StringBuffer();
     if (reverse) {

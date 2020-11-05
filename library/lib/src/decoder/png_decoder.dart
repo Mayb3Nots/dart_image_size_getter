@@ -17,4 +17,15 @@ class PngDecoder extends ImageDecoder {
 
     return Size(width, height);
   }
+
+  @override
+  Future<Size> sizeAsync() async {
+    final widthList = await input.getRangeAsync(0x10, 0x14);
+    final heightList = await input.getRangeAsync(0x14, 0x18);
+
+    final width = convertRadix16ToInt(widthList);
+    final height = convertRadix16ToInt(heightList);
+
+    return Size(width, height);
+  }
 }

@@ -22,4 +22,7 @@ class MemoryInput extends ImageInput {
   bool exists() {
     return bytes != null && bytes.isNotEmpty;
   }
+
+  @override
+  bool get supportSync => true;
 }

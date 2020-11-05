@@ -17,6 +17,15 @@ class WebpDecoder extends ImageDecoder {
     return Size(width, height);
   }
 
+  @override
+  Future<Size> sizeAsync() async {
+    final widthList = await input.getRangeAsync(0x1a, 0x1c);
+    final heightList = await input.getRangeAsync(0x1c, 0x1e);
+    final width = convertRadix16ToInt(widthList, reverse: true);
+    final height = convertRadix16ToInt(heightList, reverse: true);
+    return Size(width, height);
+  }
+
   Future<bool> isLossy() async {
     final v8Tag = input.getRange(12, 16);
     return v8Tag[3] == 0x20;
